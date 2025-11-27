@@ -1,0 +1,15 @@
+{
+  "id": "TC_Auto_001",
+  "title": "Welcome Page - Proceed to Main Application",
+  "steps": [
+    {
+      "action": "Navigate to the welcome page URL: https://dev-amber.dev.clippd.com/welcome",
+      "expected": "The welcome page loads successfully, displaying a greeting message (e.g., 'Welcome to Clippd!') and a prominent call-to-action button (e.g., 'Get Started' or 'Continue to Dashboard')."
+    },
+    {
+      "action": "Click on the primary call-to-action button (e.g., 'Get Started' or 'Continue').",
+      "expected": "The user is successfully redirected from the welcome page to the main application's dashboard or home page."
+    }
+  ],
+  "verification": "The URL changes to the application's dashboard URL (e.g., '/dashboard' or '/home'), and the main dashboard content (e.g., user data, navigation menu, 'Dashboard' title) is visible and correctly loaded."
+}

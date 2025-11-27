@@ -1,0 +1,15 @@
+{
+  "id": "TC_Auto_001",
+  "title": "Verify Application Loads Main Landing Page Successfully",
+  "steps": [
+    {
+      "action": "Navigate to the application URL: https://dev-amber.dev.clippd.com/",
+      "expected": "The application page loads without any HTTP errors (e.g., 404, 500) and no critical browser console errors are displayed."
+    },
+    {
+      "action": "Observe the displayed content on the page.",
+      "expected": "The main landing page, login screen, or dashboard of the 'Clippd' application is clearly visible and presents its primary UI elements."
+    }
+  ],
+  "verification": "Presence of the application's primary header/navigation, a visible title like 'Clippd' or 'Amber', a login form, or dashboard overview content, indicating the application has initialized and rendered successfully."
+}
