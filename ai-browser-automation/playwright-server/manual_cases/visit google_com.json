@@ -1,0 +1,27 @@
+{
+  "id": "HP_Google_001",
+  "title": "Successful Google Search",
+  "steps": [
+    {
+      "step_number": 1,
+      "action": "Open a web browser.",
+      "expected_result": "Web browser application is launched."
+    },
+    {
+      "step_number": 2,
+      "action": "Navigate to google.com in the address bar.",
+      "expected_result": "Google's homepage is displayed with a prominent search bar."
+    },
+    {
+      "step_number": 3,
+      "action": "Enter a search query (e.g., 'test automation') into the search bar.",
+      "expected_result": "The search query is entered into the search bar."
+    },
+    {
+      "step_number": 4,
+      "action": "Press the 'Enter' key or click the 'Google Search' button.",
+      "expected_result": "The search results page is displayed."
+    }
+  ],
+  "verification": "Verify that the search results page displays relevant results related to the search query and that the page loads without errors."
+}
