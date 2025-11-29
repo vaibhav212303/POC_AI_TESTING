@@ -1,49 +1,70 @@
 import asyncio
 import os
-import time
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from core.ai import get_ai_response, parse_ai_response
-from core.mcp_client import create_mcp_connection
+from core.ai import get_ai_response
+
+# Server Config
+server_script_path = os.path.abspath(os.path.join(os.getcwd(), "../playwright-server/src/index.ts"))
+server_params = StdioServerParameters(command="npx", args=["tsx", server_script_path], env=os.environ)
 
 async def run_chat_assistant():
-    print("\n💬 Starting Interactive Assistant...")
-    # ... (Paste your previous agent.py logic here, but use core.ai functions) ...
-    # Simplified for brevity:
-    server_script = os.path.abspath(os.path.join(os.getcwd(), "../playwright-server/src/index.ts"))
-    server_params = StdioServerParameters(command="npx", args=["tsx", server_script], env=os.environ)
-
+    print("🔌 Connecting to Browser Server...")
+    
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
+            
+            # Get Tools
             tools = await session.list_tools()
-            tools_schema = [{"name": t.name, "description": t.description, "inputSchema": t.inputSchema} for t in tools.tools]
+            tools_schema = []
             
-            messages = [{"role": "system", "content": "You are a QA Assistant."}]
-            
+            # --- FIX: INDENTATION CORRECTED HERE ---
+            for t in tools.tools:
+                schema = getattr(t, 'inputSchema', getattr(t, 'input_schema', {}))
+                
+                tools_schema.append({
+                    "name": t.name,
+                    "description": t.description,
+                    "inputSchema": schema 
+                })
+            # ---------------------------------------
+
+            print("✅ Connected! Type your commands.")
+            messages = []
+
             while True:
-                user_in = input("\n👤 You: ")
-                if user_in == "exit": break
-                messages.append({"role": "user", "content": user_in})
+                user_input = input("\nYou: ")
+                if user_input.lower() in ["quit", "exit"]:
+                    break
                 
-                resp = get_ai_response(messages, tools_schema)
-                intent = parse_ai_response(resp)
-                
-                if intent["type"] == "text":
-                    print(f"🤖 {intent['content']}")
-                    messages.append({"role": "assistant", "content": intent['content']})
-                elif intent["type"] == "tool_call":
-                    print(f"⚙️ {intent['name']} {intent['args']}")
-                    res = await session.call_tool(intent["name"], arguments=intent["args"])
+                messages.append({"role": "user", "parts": [user_input]})
+
+                try:
+                    response = get_ai_response(messages, tools_schema)
                     
-                    # Handle Image/Text response
-                    content_list = []
-                    for c in res.content:
-                        if c.type == "text":
-                            if c.text.startswith("IMAGE_BASE64:"):
-                                content_list.append({"type": "image", "data": c.text.replace("IMAGE_BASE64:", "")})
-                            else:
-                                content_list.append({"type": "text", "text": c.text})
-                                print(f"✅ {c.text[:100]}")
-                    
-                    messages.append({"role": "user", "content": content_list})
+                    # Check first part for function call
+                    part = response.parts[0]
+
+                    if fn := part.function_call:
+                        tool_name = fn.name
+                        tool_args = dict(fn.args)
+                        
+                        print(f"🤖 AI Action: {tool_name} {tool_args}")
+                        
+                        result = await session.call_tool(tool_name, arguments=tool_args)
+                        
+                        # Update history with tool execution
+                        messages.append({"role": "model", "parts": [part]})
+                        messages.append({
+                            "role": "function", 
+                            "name": tool_name, 
+                            "parts": [{"function_response": {"name": tool_name, "response": {"result": str(result)}}}]
+                        })
+                        print(f"✅ Result: {str(result)[:100]}...") 
+                    else:
+                        print(f"🤖 AI: {part.text}")
+                        messages.append({"role": "model", "parts": [part.text]})
+                        
+                except Exception as e:
+                    print(f"❌ Error: {e}")
