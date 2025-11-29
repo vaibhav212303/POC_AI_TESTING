@@ -1,0 +1,36 @@
+# 🤖 AI Browser Automation Suite (POC)
+
+A dual-mode AI testing framework that combines **Interactive Chat** with **Autonomous Workflows**. 
+Powered by **Google Gemini 2.0 Flash**, **Playwright**, and the **Model Context Protocol (MCP)**.
+
+## 🌟 Features
+
+- **🗣️ Interactive Chat Mode**: Manually control the browser using natural language (e.g., *"Go to Google and search for Playwright"*).
+- **🔴 Auto-Recording**: Automatically converts your chat actions into ready-to-run **Playwright TypeScript** test code.
+- **⚡ Autonomous Architect**: Loads test steps from Markdown files (`fixture/tests/`) and executes them automatically.
+- **🛠️ Self-Healing**: AI automatically retries failed steps and corrects selectors dynamically.
+- **🔌 MCP Integration**: Uses `@executeautomation/playwright-mcp-server` for standardized browser control.
+
+## 🚀 Getting Started
+
+### Prerequisites
+1. **Python 3.10+**
+2. **Node.js 18+** & **npm**
+3. **Google API Key** (for Gemini)
+
+### 1️⃣ Setup Playwright Server
+This handles the actual browser automation.
+```bash
+# Install the MCP Server globally (or locally)
+cd playwright-server
+# Install Browser Binaries (Critical Step)
+npx playwright install
+
+cd python-client
+
+# Create Virtual Environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install Dependencies
+pip install -r requirements.txt
