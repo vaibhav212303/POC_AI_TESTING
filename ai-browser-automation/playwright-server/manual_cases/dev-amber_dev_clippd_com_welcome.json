@@ -12,4 +12,5 @@
     }
   ],
   "verification": "The URL changes to the application's dashboard URL (e.g., '/dashboard' or '/home'), and the main dashboard content (e.g., user data, navigation menu, 'Dashboard' title) is visible and correctly loaded."
+
 }
