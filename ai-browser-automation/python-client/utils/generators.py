@@ -1,14 +1,39 @@
 import json
 import os
-from core.ai import get_ai_response, ACTIVE_MODEL
+from core.ai import get_ai_response  # Removed ACTIVE_MODEL import
 from utils.validator import PlaywrightValidator
 
 # Setup paths relative to this file
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SERVER_DIR = os.path.join(BASE_DIR, "ai-browser-automation", "playwright-server") 
-# Adjust 'ai-browser-automation' if your root folder name differs
 
 validator = PlaywrightValidator(SERVER_DIR)
+
+# --- HELPER: Handle different AI response formats dynamically ---
+def extract_ai_text(resp):
+    """
+    Automatically detects if response is from Gemini (has .text) 
+    or OpenAI/Claude (has .content).
+    """
+    try:
+        # Gemini
+        if hasattr(resp, 'text'):
+            return resp.text
+        
+        # OpenAI / Claude
+        if hasattr(resp, 'content'):
+            # Claude returns a list of content blocks
+            if isinstance(resp.content, list):
+                return resp.content[0].text
+            # OpenAI returns a string
+            return resp.content
+            
+    except Exception as e:
+        print(f"⚠️ Error extracting text: {e}")
+        
+    return str(resp)
+
+# ---------------------------------------------------------------
 
 def fix_code_with_ai(bad_code, error_messages, context):
     print(f"   🔧 Fixing {context} errors...")
@@ -20,7 +45,10 @@ def fix_code_with_ai(bad_code, error_messages, context):
     RETURN ONLY FIXED TYPESCRIPT CODE.
     """
     resp = get_ai_response([{"role": "user", "content": prompt}])
-    text = resp.text if ACTIVE_MODEL == "gemini" else resp.content
+    
+    # Use helper instead of checking model name
+    text = extract_ai_text(resp)
+    
     return text.replace("```typescript", "").replace("```", "").strip()
 
 def generate_pom_code(manual_test_json):
@@ -40,7 +68,9 @@ def generate_pom_code(manual_test_json):
     """
     
     resp = get_ai_response([{"role": "user", "content": prompt}])
-    code = resp.text if ACTIVE_MODEL == "gemini" else resp.content
+    
+    # Use helper
+    code = extract_ai_text(resp)
     code = code.replace("```typescript", "").replace("```", "").strip()
 
     # Validation
@@ -65,7 +95,9 @@ def generate_spec_code(manual_test_json, pom_class_name):
     """
     
     resp = get_ai_response([{"role": "user", "content": prompt}])
-    code = resp.text if ACTIVE_MODEL == "gemini" else resp.content
+    
+    # Use helper
+    code = extract_ai_text(resp)
     code = code.replace("```typescript", "").replace("```", "").strip()
 
     # Validation
@@ -83,5 +115,8 @@ def generate_manual_test_proposal(url, page_content):
     RETURN ONLY JSON.
     """
     resp = get_ai_response([{"role": "user", "content": prompt}])
-    text = resp.text if ACTIVE_MODEL == "gemini" else resp.content
+    
+    # Use helper
+    text = extract_ai_text(resp)
+    
     return text.replace("```json", "").replace("```", "").strip()

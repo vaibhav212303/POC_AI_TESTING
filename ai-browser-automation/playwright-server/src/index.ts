@@ -3,11 +3,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { chromium, Browser, Page } from "playwright";
 
-// 1. Global State (Keeps the browser open between AI commands)
 let browser: Browser | null = null;
 let page: Page | null = null;
 
-// 2. Initialize MCP Server
 const server = new Server(
   {
     name: "playwright-server",
@@ -20,7 +18,6 @@ const server = new Server(
   }
 );
 
-// 3. Define Available Tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
@@ -68,7 +65,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         description: "Get text content of the page to verify results",
         inputSchema: { type: "object", properties: {} },
       },
-      // --- NEW: SCREENSHOT TOOL ---
       {
         name: "screenshot",
         description: "Take a screenshot. Returns the image for AI analysis.",
@@ -85,65 +81,49 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   };
 });
 
-// 4. Handle Tool Execution
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     const { name, arguments: args } = request.params;
-
     if (name === "launch_browser") {
         if (browser) await browser.close();
         browser = await chromium.launch({ headless: false }); // Visible window
         page = await browser.newPage();
         return { content: [{ type: "text", text: "Browser launched successfully." }] };
     }
-
-    // For all other tools, check if browser exists
     if (!page) {
       return { 
         content: [{ type: "text", text: "Error: Browser not running. Call launch_browser first." }],
         isError: true 
       };
     }
-
     switch (name) {
       case "navigate": {
         const url = String(args?.url);
         await page.goto(url);
         return { content: [{ type: "text", text: `Navigated to ${url}` }] };
       }
-
       case "click": {
         const selector = String(args?.selector);
         await page.click(selector);
         return { content: [{ type: "text", text: `Clicked element: ${selector}` }] };
       }
-
       case "fill": {
         const selector = String(args?.selector);
         const value = String(args?.value);
         await page.fill(selector, value);
         return { content: [{ type: "text", text: `Filled ${selector} with '${value}'` }] };
       }
-
       case "get_content": {
         const text = await page.innerText("body");
         const cleanText = text.slice(0, 2000); 
         return { content: [{ type: "text", text: cleanText }] };
       }
-
-      // --- NEW: SCREENSHOT LOGIC ---
       case "screenshot": {
         const name = String(args?.name || "screenshot.png");
         const fullPage = Boolean(args?.fullPage);
         const path = process.cwd() + "/" + name;
-        
-        // 1. Take Screenshot (buffer)
         const buffer = await page.screenshot({ path: path, fullPage: fullPage });
-        
-        // 2. Convert to Base64
         const base64Image = buffer.toString("base64");
-
-        // 3. Return both a message AND the Base64 data with a prefix
         return { 
             content: [
                 { type: "text", text: `Screenshot saved locally to: ${path}` },
@@ -151,7 +131,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             ] 
         };
       }
-
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -162,8 +141,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     };
   }
 });
-
-// 5. Start Listening
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error("Playwright MCP Server started on STDIO");

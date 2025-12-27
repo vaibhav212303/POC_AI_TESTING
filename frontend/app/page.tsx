@@ -62,7 +62,7 @@ export default function AgentDashboard() {
     if (eventSourceRef.current) eventSourceRef.current.close();
 
     // Connect to Backend
-    const BACKEND_URL = "http://localhost:8000"; 
+    const BACKEND_URL = "https://automation-backend-9jov.onrender.com"; 
     const url = `${BACKEND_URL}/stream-task?task=${encodeURIComponent(task)}&model=${provider}`;
     
     const es = new EventSource(url);
@@ -126,7 +126,7 @@ export default function AgentDashboard() {
 
   const sendCommand = async (command: 'pause' | 'resume' | 'step') => {
     try {
-      await fetch('http://localhost:8000/control', {
+      await fetch('https://automation-backend-9jov.onrender.com/control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ command }),
