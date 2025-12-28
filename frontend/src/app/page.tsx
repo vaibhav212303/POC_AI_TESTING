@@ -1,0 +1,87 @@
+"use client";
+
+import { useState } from "react";
+import { Bot, TestTube, FileCode, Bug, Settings, MessageSquare } from "lucide-react";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import ArchitectView from "@/_components/ArchitectView";
+import ChatView from "@/_components/ChatView";
+
+
+function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
+
+export default function Home() {
+  const [activeView, setActiveView] = useState<"chat" | "architect">("chat");
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+
+  // ... (WebSocket connection logic can stay here or move to a Context)
+
+  return (
+    <div className="flex h-screen bg-[#111] text-zinc-300 font-sans text-sm antialiased">
+      
+      {/* SIDEBAR NAVIGATION */}
+      <aside className="w-16 lg:w-64 bg-black/30 border-r border-white/5 flex flex-col transition-all duration-300">
+        <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 gap-3 border-b border-white/5">
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-900/20">
+            <Bot className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="font-semibold text-white tracking-tighter hidden lg:block">QA Suite</h1>
+        </div>
+
+        <nav className="p-2 space-y-1 mt-4">
+          <NavItem 
+            icon={<MessageSquare className="w-4 h-4" />} 
+            label="Interactive Chat" 
+            isActive={activeView === "chat"} 
+            onClick={() => setActiveView("chat")}
+          />
+          <NavItem 
+            icon={<FileCode className="w-4 h-4" />} 
+            label="Test Creator" 
+            isActive={activeView === "architect"} 
+            onClick={() => setActiveView("architect")}
+          />
+          <div className="my-4 border-t border-white/5 mx-2" />
+          <NavItem icon={<TestTube className="w-4 h-4" />} label="Test Runner" />
+          <NavItem icon={<Bug className="w-4 h-4" />} label="Self-Healing" />
+        </nav>
+
+        <div className="mt-auto p-4 border-t border-white/5">
+          <button className="flex items-center gap-3 p-2 rounded-md hover:bg-white/5 w-full text-zinc-500 hover:text-zinc-300 transition-colors">
+            <Settings className="w-4 h-4" />
+            <span className="hidden lg:block text-xs font-medium">Settings</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN VIEW AREA */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[#09090b]">
+        {activeView === "chat" ? (
+          // Render the Chat Interface (You need to move your previous code to a component)
+          <ChatView /> 
+        ) : (
+          // Render the new Architect Interface
+          <ArchitectView socket={socket} />
+        )}
+      </main>
+    </div>
+  );
+}
+
+// Helper Component for Sidebar Items
+function NavItem({ icon, label, isActive, onClick }: any) {
+  return (
+    <button 
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-md w-full transition-all group",
+        isActive 
+          ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20" 
+          : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+      )}
+    >
+      <span className={cn(isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-zinc-300")}>{icon}</span>
+      <span className="hidden lg:block font-medium">{label}</span>
+    </button>
+  );
+}
