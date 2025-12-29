@@ -1,20 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, TestTube, FileCode, Bug, Settings, MessageSquare } from "lucide-react";
+import { 
+  Bot, 
+  TestTube, 
+  FileCode, 
+  Bug, 
+  Settings, 
+  MessageSquare, 
+  PenTool 
+} from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import ArchitectView from "@/_components/ArchitectView";
-import ChatView from "@/_components/ChatView";
+
+// --- Components ---
+import ArchitectView from "@/app/_components/ArchitectView";
+import ChatView from "@/app/_components/ChatView";
+import CreateTestCase from "./(route)/testcases/page";
 
 
 function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
 
+// Define view types
+type ViewState = "chat" | "architect" | "testcases";
+
 export default function Home() {
-  const [activeView, setActiveView] = useState<"chat" | "architect">("chat");
+  const [activeView, setActiveView] = useState<ViewState>("chat");
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
-  // ... (WebSocket connection logic can stay here or move to a Context)
+  // ... (WebSocket connection logic can stay here if needed globally)
 
   return (
     <div className="flex h-screen bg-[#111] text-zinc-300 font-sans text-sm antialiased">
@@ -29,19 +43,37 @@ export default function Home() {
         </div>
 
         <nav className="p-2 space-y-1 mt-4">
+          <div className="px-3 pb-2 text-[10px] uppercase font-bold text-zinc-600 tracking-wider hidden lg:block">
+            Automation
+          </div>
+          
           <NavItem 
             icon={<MessageSquare className="w-4 h-4" />} 
-            label="Interactive Chat" 
+            label="AI Chat" 
             isActive={activeView === "chat"} 
             onClick={() => setActiveView("chat")}
           />
+          
           <NavItem 
             icon={<FileCode className="w-4 h-4" />} 
-            label="Test Creator" 
+            label="AI Architect" 
             isActive={activeView === "architect"} 
             onClick={() => setActiveView("architect")}
           />
+
           <div className="my-4 border-t border-white/5 mx-2" />
+          
+          <div className="px-3 pb-2 text-[10px] uppercase font-bold text-zinc-600 tracking-wider hidden lg:block">
+            Manual
+          </div>
+
+          <NavItem 
+            icon={<PenTool className="w-4 h-4" />} 
+            label="Test Builder" 
+            isActive={activeView === "testcases"} 
+            onClick={() => setActiveView("testcases")}
+          />
+          
           <NavItem icon={<TestTube className="w-4 h-4" />} label="Test Runner" />
           <NavItem icon={<Bug className="w-4 h-4" />} label="Self-Healing" />
         </nav>
@@ -56,13 +88,9 @@ export default function Home() {
 
       {/* MAIN VIEW AREA */}
       <main className="flex-1 flex flex-col min-w-0 bg-[#09090b]">
-        {activeView === "chat" ? (
-          // Render the Chat Interface (You need to move your previous code to a component)
-          <ChatView /> 
-        ) : (
-          // Render the new Architect Interface
-          <ArchitectView socket={socket} />
-        )}
+        {activeView === "chat" && <ChatView />}
+        {activeView === "architect" && <ArchitectView socket={socket} />}
+        {activeView === "testcases" && <CreateTestCase />}
       </main>
     </div>
   );
