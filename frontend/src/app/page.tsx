@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  Bot, 
-  TestTube, 
-  FileCode, 
-  Bug, 
-  Settings, 
-  MessageSquare, 
-  PenTool 
+import {
+  Bot,
+  TestTube,
+  FileCode,
+  Bug,
+  Settings,
+  MessageSquare,
+  PenTool,
+  PlayCircle
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -17,12 +18,12 @@ import { twMerge } from "tailwind-merge";
 import ArchitectView from "@/app/_components/ArchitectView";
 import ChatView from "@/app/_components/ChatView";
 import CreateTestCase from "./(route)/testcases/page";
-
+import CypressDashboard from "@/app/_components/CypressDashboard";   
 
 function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
 
 // Define view types
-type ViewState = "chat" | "architect" | "testcases";
+type ViewState = "chat" | "architect" | "testcases" | "cypress";
 
 export default function Home() {
   const [activeView, setActiveView] = useState<ViewState>("chat");
@@ -32,7 +33,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-[#111] text-zinc-300 font-sans text-sm antialiased">
-      
+
       {/* SIDEBAR NAVIGATION */}
       <aside className="w-16 lg:w-64 bg-black/30 border-r border-white/5 flex flex-col transition-all duration-300">
         <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 gap-3 border-b border-white/5">
@@ -46,34 +47,41 @@ export default function Home() {
           <div className="px-3 pb-2 text-[10px] uppercase font-bold text-zinc-600 tracking-wider hidden lg:block">
             Automation
           </div>
-          
-          <NavItem 
-            icon={<MessageSquare className="w-4 h-4" />} 
-            label="AI Chat" 
-            isActive={activeView === "chat"} 
+
+          <NavItem
+            icon={<MessageSquare className="w-4 h-4" />}
+            label="AI Chat"
+            isActive={activeView === "chat"}
             onClick={() => setActiveView("chat")}
           />
-          
-          <NavItem 
-            icon={<FileCode className="w-4 h-4" />} 
-            label="AI Architect" 
-            isActive={activeView === "architect"} 
+
+          <NavItem
+            icon={<FileCode className="w-4 h-4" />}
+            label="AI Architect"
+            isActive={activeView === "architect"}
             onClick={() => setActiveView("architect")}
           />
 
+          <NavItem
+            icon={<PlayCircle className="w-4 h-4" />}
+            label="Cypress Runner"
+            isActive={activeView === "cypress"}
+            onClick={() => setActiveView("cypress")}
+          />
+
           <div className="my-4 border-t border-white/5 mx-2" />
-          
+
           <div className="px-3 pb-2 text-[10px] uppercase font-bold text-zinc-600 tracking-wider hidden lg:block">
             Manual
           </div>
 
-          <NavItem 
-            icon={<PenTool className="w-4 h-4" />} 
-            label="Test Builder" 
-            isActive={activeView === "testcases"} 
+          <NavItem
+            icon={<PenTool className="w-4 h-4" />}
+            label="Test Builder"
+            isActive={activeView === "testcases"}
             onClick={() => setActiveView("testcases")}
           />
-          
+
           <NavItem icon={<TestTube className="w-4 h-4" />} label="Test Runner" />
           <NavItem icon={<Bug className="w-4 h-4" />} label="Self-Healing" />
         </nav>
@@ -91,6 +99,7 @@ export default function Home() {
         {activeView === "chat" && <ChatView />}
         {activeView === "architect" && <ArchitectView socket={socket} />}
         {activeView === "testcases" && <CreateTestCase />}
+        {activeView === "cypress" && <CypressDashboard />}
       </main>
     </div>
   );
@@ -99,12 +108,12 @@ export default function Home() {
 // Helper Component for Sidebar Items
 function NavItem({ icon, label, isActive, onClick }: any) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 rounded-md w-full transition-all group",
-        isActive 
-          ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20" 
+        isActive
+          ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
           : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
       )}
     >
