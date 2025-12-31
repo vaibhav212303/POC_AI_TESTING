@@ -18,12 +18,13 @@ import { twMerge } from "tailwind-merge";
 import ArchitectView from "@/app/_components/ArchitectView";
 import ChatView from "@/app/_components/ChatView";
 import CreateTestCase from "./(route)/testcases/page";
-import CypressDashboard from "@/app/_components/CypressDashboard";   
+import CypressDashboard from "@/app/_components/CypressDashboard";
+import AutomationDashboard from "./_components/PlaywrightDashboard";
 
 function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
 
 // Define view types
-type ViewState = "chat" | "architect" | "testcases" | "cypress";
+type ViewState = "chat" | "architect" | "testcases" | "cypress" | "playwright";
 
 export default function Home() {
   const [activeView, setActiveView] = useState<ViewState>("chat");
@@ -68,6 +69,12 @@ export default function Home() {
             isActive={activeView === "cypress"}
             onClick={() => setActiveView("cypress")}
           />
+          <NavItem
+            icon={<PlayCircle className="w-4 h-4" />}
+            label="Playwright Runner"
+            isActive={activeView === "playwright"}
+            onClick={() => setActiveView("playwright")}
+          />
 
           <div className="my-4 border-t border-white/5 mx-2" />
 
@@ -100,6 +107,7 @@ export default function Home() {
         {activeView === "architect" && <ArchitectView socket={socket} />}
         {activeView === "testcases" && <CreateTestCase />}
         {activeView === "cypress" && <CypressDashboard />}
+        {activeView === "playwright" && <AutomationDashboard />}
       </main>
     </div>
   );

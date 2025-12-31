@@ -1,7 +1,5 @@
-import { pgTable, serial, text, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, integer, jsonb, unique } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-
-export const statusEnum = pgEnum('status', ['running', 'completed', 'failed', 'passed']);
 
 export const automationBuilds = pgTable('automation_builds', {
   id: serial('id').primaryKey(),
@@ -13,15 +11,14 @@ export const automationBuilds = pgTable('automation_builds', {
 export const testResults = pgTable('test_results', {
   id: serial('id').primaryKey(),
   buildId: integer('build_id').references(() => automationBuilds.id, { onDelete: 'cascade' }),
-  caseCode: text('case_code').notNull(), // TC5073
-  title: text('title').notNull(),
-  status: text('status').notNull(), // passed, failed
-  duration: text('duration'),
-  errorMessage: text('error_message'),
+  specFile: text('spec_file').notNull(),
+  tests: jsonb('tests').default([]).notNull(), // Stores array of test objects
   executedAt: timestamp('executed_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // CONCURRENCY CONTROL: Prevents race conditions during parallel execution
+  buildSpecUnique: unique().on(table.buildId, table.specFile),
+}));
 
-// Relationships
 export const buildsRelations = relations(automationBuilds, ({ many }) => ({
   results: many(testResults),
 }));
